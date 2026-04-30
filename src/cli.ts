@@ -1,7 +1,7 @@
 import { Command as CommanderCommand } from 'commander';
 import type { Command } from './types.js';
 import { readdirSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { dirname, join } from 'node:path';
 
 export async function createProgram(): Promise<CommanderCommand> {
@@ -13,10 +13,10 @@ export async function createProgram(): Promise<CommanderCommand> {
 
   const __dirname = dirname(fileURLToPath(import.meta.url));
   const commandsDir = join(__dirname, 'commands');
-  const files = readdirSync(commandsDir).filter((f) => f.endsWith('.js'));
+  const files = readdirSync(commandsDir).filter((f: string) => f.endsWith('.js'));
 
   for (const file of files) {
-    const mod = await import(join(commandsDir, file));
+    const mod = await import(pathToFileURL(join(commandsDir, file)).href);
     const cmd: Command = mod.default;
 
     const c = program.command(cmd.name).description(cmd.description);
@@ -27,7 +27,8 @@ export async function createProgram(): Promise<CommanderCommand> {
       c.option(opt.flags, opt.description, opt.default);
     }
     c.action(async (...rest) => {
-      const opts = rest.pop() as Record<string, unknown>;
+      const command = rest.pop() as CommanderCommand;
+      const opts = command.opts() as Record<string, unknown>;
       await cmd.action({ positional: rest }, opts);
     });
   }

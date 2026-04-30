@@ -8,9 +8,10 @@ export default {
   arguments: '<action> [key] [value]',
   options: [],
   action: async (args, _opts) => {
-    const action = args.positional[0] as string;
-    const key = args.positional[1] as string | undefined;
-    const value = args.positional[2] as string | undefined;
+    const positional = args.positional as string[];
+    const action = positional[0];
+    const key = positional[1];
+    const value = positional[2];
 
     switch (action) {
       case 'list': {
@@ -25,7 +26,7 @@ export default {
           logger.error('Usage: my-cli config get <key>');
           process.exit(1);
         }
-        const val = config.get(key);
+        const val = config.get(key!);
         if (val === undefined) {
           logger.warn(`Key "${key}" not found`);
         } else {
@@ -38,7 +39,7 @@ export default {
           logger.error('Usage: my-cli config set <key> <value>');
           process.exit(1);
         }
-        config.set(key, value);
+        config.set(key!, value!);
         logger.success(`Set ${key} = ${value}`);
         break;
       }
