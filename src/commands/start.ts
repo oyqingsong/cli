@@ -19,18 +19,23 @@ export default {
     }
 
     const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8'));
-    const script = pkg.scripts?.dev ?? pkg.scripts?.start;
-    if (!script) {
+    const hasDev = !!pkg.scripts?.dev;
+    const hasStart = !!pkg.scripts?.start;
+
+    if (!hasDev && !hasStart) {
       logger.error('No "dev" or "start" script found in package.json');
       process.exit(1);
     }
 
+    const scriptName = hasDev ? 'dev' : 'start';
     const port = opts.port as string;
     const openBrowser = opts.open === 'true';
 
-    // Build command with optional flags
-    let cmd = script;
-    if (cmd.includes('vite')) {
+    const isVite = (pkg.scripts?.[scriptName] as string)?.includes('vite');
+
+    let cmd = `npm run ${scriptName}`;
+    if (isVite) {
+      cmd += ' --';
       cmd += ` --port ${port}`;
       if (openBrowser) cmd += ' --open';
     }
