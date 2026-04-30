@@ -9,7 +9,30 @@
       "Bash(npm install *)",
       "Bash(git init *)",
       "Bash(git add *)",
-      "Bash(git commit *)"
+      "Bash(git commit *)",
+      "Bash(git config *)",
+      "Bash(node -e \"const pkg = require\\('./package.json'\\); console.log\\(JSON.stringify\\({name: pkg.name, version: pkg.version, type: pkg.type, deps: Object.keys\\(pkg.dependencies\\), devDeps: Object.keys\\(pkg.devDependencies\\)}, null, 2\\)\\)\")",
+      "Bash(echo \"exit: $?\")",
+      "Bash(npx tsc *)",
+      "Bash(node bin/my-cli.js --help)",
+      "Bash(node bin/my-cli.js hello)",
+      "Bash(node bin/my-cli.js hello --name Claude)",
+      "Bash(node bin/my-cli.js hello -n Claude)",
+      "Bash(node bin/my-cli.js config list)",
+      "Bash(node bin/my-cli.js config set locale en-US)",
+      "Bash(node bin/my-cli.js config get locale)",
+      "Bash(npm link *)",
+      "Bash(my-cli *)",
+      "Bash(node bin/my-cli.js create-react --help)",
+      "Bash(node bin/my-cli.js create-react)",
+      "Bash(echo \"EXIT CODE: $?\")",
+      "Bash(mkdir -p /tmp/test-existing-dir)",
+      "Bash(node bin/my-cli.js create-react /tmp/test-existing-dir)",
+      "Bash(rm -rf /tmp/test-existing-dir)",
+      "Bash(echo \"Cleanup done: $?\")",
+      "Bash(node bin/my-cli.js create-react --preset standard test-std --help)",
+      "Bash(node bin/my-cli.js create-react --preset unknown test-x --help)",
+      "Bash(node bin/my-cli.js start --help)"
     ]
   }
 }
