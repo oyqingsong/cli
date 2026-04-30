@@ -3,7 +3,7 @@ import { join, resolve } from 'node:path';
 import { logger } from '../utils/logger.js';
 import { prompt } from '../utils/prompt.js';
 import { run } from '../utils/exec.js';
-import { DEPENDENCIES, VITE_TEMPLATE, getEslintConfig, PRETTIER_CONFIG, PRETTIER_DEV_DEPS, PRESETS, CSS_OPTIONS, getPackagesWithVersions, } from '../utils/templates.js';
+import { DEPENDENCIES, VITE_TEMPLATE, PRETTIER_CONFIG, PRETTIER_DEV_DEPS, PRESETS, CSS_OPTIONS, getPackagesWithVersions, } from '../utils/templates.js';
 export default {
     name: 'create-react',
     description: 'Create a new React project with Vite',
@@ -157,18 +157,10 @@ export default {
                 logger.warn(`Failed to install ${depName}, skipping`);
             }
         }
-        // ESLint setup
+        // ESLint: create-vite already includes ESLint 10 with flat config,
+        // no need to install or configure separately
         if (selectedTooling.includes('ESLint')) {
-            const isTypescript = language === 'TypeScript';
-            const { config, devDeps } = getEslintConfig(isTypescript);
-            try {
-                run(`npm install --save-dev ${devDeps.join(' ')}`, projectPath);
-                writeFileSync(join(projectPath, '.eslintrc.json'), JSON.stringify(config, null, 2) + '\n', 'utf-8');
-                logger.success('ESLint configured');
-            }
-            catch {
-                logger.warn('Failed to configure ESLint');
-            }
+            logger.success('ESLint configured (included in Vite template)');
         }
         // Prettier setup
         if (selectedTooling.includes('Prettier')) {

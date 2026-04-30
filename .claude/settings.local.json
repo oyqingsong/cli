@@ -32,7 +32,9 @@
       "Bash(echo \"Cleanup done: $?\")",
       "Bash(node bin/my-cli.js create-react --preset standard test-std --help)",
       "Bash(node bin/my-cli.js create-react --preset unknown test-x --help)",
-      "Bash(node bin/my-cli.js start --help)"
+      "Bash(node bin/my-cli.js start --help)",
+      "Read(//d/D桌面/gz/code/test_cli/**)",
+      "Bash(npx create-vite *)"
     ]
   }
 }
