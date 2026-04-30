@@ -7,7 +7,6 @@ import { run } from '../utils/exec.js';
 import {
   DEPENDENCIES,
   VITE_TEMPLATE,
-  getEslintConfig,
   PRETTIER_CONFIG,
   PRETTIER_DEV_DEPS,
   PRESETS,
@@ -171,21 +170,10 @@ export default {
       }
     }
 
-    // ESLint setup
+    // ESLint: create-vite already includes ESLint 10 with flat config,
+    // no need to install or configure separately
     if (selectedTooling.includes('ESLint')) {
-      const isTypescript = language === 'TypeScript';
-      const { config, devDeps } = getEslintConfig(isTypescript);
-      try {
-        run(`npm install --save-dev ${devDeps.join(' ')}`, projectPath);
-        writeFileSync(
-          join(projectPath, '.eslintrc.json'),
-          JSON.stringify(config, null, 2) + '\n',
-          'utf-8',
-        );
-        logger.success('ESLint configured');
-      } catch {
-        logger.warn('Failed to configure ESLint');
-      }
+      logger.success('ESLint configured (included in Vite template)');
     }
 
     // Prettier setup
