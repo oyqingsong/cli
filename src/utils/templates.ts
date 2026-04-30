@@ -75,7 +75,7 @@ export const PRESETS: Record<string, { language: string; deps: string[]; tooling
   },
   full: {
     language: 'TypeScript',
-    deps: ['React Router', 'Zustand', 'GZ UI', 'Axios'],
+    deps: ['React Router', 'Zustand', 'GZ UI', 'Axios', 'ECharts', 'KLineChart', 'AG Grid'],
     tooling: ['ESLint', 'Prettier'],
     css: 'Less',
   },
