@@ -18,7 +18,7 @@ import type { CssOption } from '../utils/templates.js';
 
 export default {
   name: 'create-react',
-  description: 'Create a new React project with Vite',
+  description: 'Create a new React project with Vite test',
   arguments: '<project-name>',
   options: [
     { flags: '-p, --preset <preset>', description: 'Preset: minimal, standard, full' },
