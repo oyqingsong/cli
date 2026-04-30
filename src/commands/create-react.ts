@@ -1,4 +1,4 @@
-import { existsSync, writeFileSync, rmSync } from 'node:fs';
+import { existsSync, writeFileSync, rmSync, readFileSync, readdirSync, renameSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import type { Command } from '../types.js';
 import { logger } from '../utils/logger.js';
@@ -11,7 +11,10 @@ import {
   PRETTIER_CONFIG,
   PRETTIER_DEV_DEPS,
   PRESETS,
+  CSS_OPTIONS,
+  getPackagesWithVersions,
 } from '../utils/templates.js';
+import type { CssOption } from '../utils/templates.js';
 
 export default {
   name: 'create-react',
@@ -21,9 +24,10 @@ export default {
     { flags: '-p, --preset <preset>', description: 'Preset: minimal, standard, full' },
     { flags: '--ts', description: 'Use TypeScript (default)', default: 'false' },
     { flags: '--js', description: 'Use JavaScript', default: 'false' },
+    { flags: '--css <css>', description: 'CSS preprocessor: css, less' },
     { flags: '--eslint', description: 'Include ESLint', default: 'false' },
     { flags: '--prettier', description: 'Include Prettier', default: 'false' },
-    { flags: '-d, --deps <deps...>', description: 'Extra dependencies: react-router, zustand, tailwind, antd' },
+    { flags: '-d, --deps <deps...>', description: 'Extra dependencies: react-router, zustand, tailwind, gz-ui' },
   ],
   action: async (args, opts) => {
     const positional = (args.positional ?? []) as string[];
@@ -51,22 +55,27 @@ export default {
       'react-router': 'React Router',
       'zustand': 'Zustand',
       'tailwind': 'Tailwind CSS',
-      'antd': 'Ant Design',
+      'gz-ui': 'GZ UI',
     };
 
-    const hasCliOpts = opts.ts === 'true' || opts.js === 'true' || opts.eslint === 'true' || opts.prettier === 'true' || (opts.deps as string[])?.length;
+    const CSS_ALIAS: Record<string, CssOption> = {
+      css: 'CSS',
+      less: 'Less',
+    };
+
+    const hasCliOpts = opts.ts === 'true' || opts.js === 'true' || opts.eslint === 'true' || opts.prettier === 'true' || (opts.deps as string[])?.length || opts.css;
 
     let language: string;
     let selectedDeps: string[];
     let selectedTooling: string[];
+    let cssChoice: CssOption;
 
     if (preset && !hasCliOpts) {
-      // Use preset values directly
       language = preset.language;
       selectedDeps = [...preset.deps];
       selectedTooling = [...preset.tooling];
+      cssChoice = preset.css;
     } else {
-      // Determine language
       if (opts.js === 'true') {
         language = 'JavaScript';
       } else if (preset) {
@@ -75,18 +84,15 @@ export default {
         language = await prompt.select('Select language:', ['TypeScript', 'JavaScript']);
       }
 
-      // Determine dependencies
       const cliDeps = ((opts.deps as string[]) ?? []).map((d: string) => DEP_ALIASES[d] ?? d);
       if (cliDeps.length) {
         selectedDeps = cliDeps;
       } else if (preset) {
         selectedDeps = [...preset.deps];
       } else {
-        const depChoices = Object.keys(DEPENDENCIES);
-        selectedDeps = await prompt.multiselect('Select extra dependencies (space to toggle, enter to confirm):', depChoices);
+        selectedDeps = await prompt.multiselect('Select extra dependencies (space to toggle, enter to confirm):', Object.keys(DEPENDENCIES));
       }
 
-      // Determine tooling
       const cliTooling: string[] = [];
       if (opts.eslint === 'true') cliTooling.push('ESLint');
       if (opts.prettier === 'true') cliTooling.push('Prettier');
@@ -97,14 +103,24 @@ export default {
       } else {
         selectedTooling = await prompt.multiselect('Select code tooling:', ['ESLint', 'Prettier']);
       }
+
+      const cssInput = opts.css as string | undefined;
+      if (cssInput) {
+        cssChoice = CSS_ALIAS[cssInput.toLowerCase()] ?? 'CSS';
+      } else if (preset) {
+        cssChoice = preset.css;
+      } else {
+        cssChoice = await prompt.select('Select CSS preprocessor:', [...CSS_OPTIONS]) as CssOption;
+      }
     }
 
     const template = VITE_TEMPLATE[language];
 
-    // Step 4: Confirm
+    // Confirm
     console.log('');
     logger.info(`Project: ${projectName}`);
     logger.info(`Language: ${language}`);
+    logger.info(`CSS: ${cssChoice}`);
     logger.info(`Dependencies: ${selectedDeps.length ? selectedDeps.join(', ') : 'none'}`);
     logger.info(`Tooling: ${selectedTooling.length ? selectedTooling.join(', ') : 'none'}`);
     console.log('');
@@ -115,7 +131,7 @@ export default {
       return;
     }
 
-    // Step 5: Run create-vite
+    // Run create-vite
     try {
       run(`npx create-vite ${projectName} --template ${template}`);
     } catch {
@@ -126,20 +142,32 @@ export default {
       process.exit(1);
     }
 
-    // Step 6: Install extra dependencies
+    // Less setup
+    if (cssChoice === 'Less') {
+      try {
+        run('npm install --save-dev less', projectPath);
+        // Rewrite .css files to .less and update imports
+        rewriteCssToLess(projectPath);
+        logger.success('Less configured');
+      } catch {
+        logger.warn('Failed to configure Less');
+      }
+    }
+
+    // Install extra dependencies (with pinned versions)
     for (const depName of selectedDeps) {
       const dep = DEPENDENCIES[depName];
       if (!dep) continue;
       const flag = dep.dev ? ' --save-dev' : '';
-      const installCmd = `npm install ${dep.packages.join(' ')}${flag}`;
+      const packages = getPackagesWithVersions(dep).join(' ');
       try {
-        run(installCmd, projectPath);
+        run(`npm install ${packages}${flag}`, projectPath);
       } catch {
         logger.warn(`Failed to install ${depName}, skipping`);
       }
     }
 
-    // Step 7: ESLint setup
+    // ESLint setup
     if (selectedTooling.includes('ESLint')) {
       const isTypescript = language === 'TypeScript';
       const { config, devDeps } = getEslintConfig(isTypescript);
@@ -156,7 +184,7 @@ export default {
       }
     }
 
-    // Step 8: Prettier setup
+    // Prettier setup
     if (selectedTooling.includes('Prettier')) {
       try {
         run(`npm install --save-dev ${PRETTIER_DEV_DEPS.join(' ')}`, projectPath);
@@ -171,7 +199,7 @@ export default {
       }
     }
 
-    // Step 9: Done
+    // Done
     console.log('');
     logger.success(`Project "${projectName}" created successfully!`);
     console.log('');
@@ -180,3 +208,23 @@ export default {
     console.log('');
   },
 } satisfies Command;
+
+function rewriteCssToLess(projectPath: string): void {
+  const srcDir = join(projectPath, 'src');
+  const entries = readdirSync(srcDir, { withFileTypes: true });
+
+  for (const entry of entries) {
+    if (entry.isFile() && entry.name.endsWith('.css')) {
+      const oldPath = join(srcDir, entry.name);
+      const newPath = join(srcDir, entry.name.replace(/\.css$/, '.less'));
+      renameSync(oldPath, newPath);
+    }
+
+    if (entry.isFile() && /\.(tsx?|jsx?)$/.test(entry.name)) {
+      const filePath = join(srcDir, entry.name);
+      let content = readFileSync(filePath, 'utf-8');
+      content = content.replace(/\.css(['"])/g, '.less$1');
+      writeFileSync(filePath, content, 'utf-8');
+    }
+  }
+}
