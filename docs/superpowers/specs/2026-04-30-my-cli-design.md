@@ -142,7 +142,7 @@ my-cli create-react <project-name>
 --css <css>             CSS 预处理器：css, less
 --eslint                包含 ESLint
 --prettier              包含 Prettier
--d, --deps <deps...>    额外依赖：react-router, zustand, tailwind, gz-ui
+-d, --deps <deps...>    额外依赖：react-router, zustand, tailwind, gz-ui, axios, echarts, klinechart, ag-grid
 ```
 
 **优先级：** CLI 参数 > preset > 交互提示
@@ -151,7 +151,7 @@ my-cli create-react <project-name>
 
 1. 语言选择 — TypeScript / JavaScript（默认 TypeScript）
 2. CSS 预处理器 — CSS / Less（默认 CSS）
-3. 额外依赖（多选）— React Router、Zustand、Tailwind CSS、GZ UI
+3. 额外依赖（多选）— React Router、Zustand、Tailwind CSS、GZ UI、Axios、ECharts、KLineChart、AG Grid
 4. 代码规范（多选）— ESLint、Prettier
 5. 确认后开始创建
 
@@ -170,7 +170,7 @@ my-cli create-react <project-name>
 |--------|------|-----|------|------|
 | minimal | TypeScript | CSS | 无 | 无 |
 | standard | TypeScript | Less | React Router | ESLint + Prettier |
-| full | TypeScript | Less | React Router, Zustand, GZ UI | ESLint + Prettier |
+| full | TypeScript | Less | React Router, Zustand, GZ UI, Axios | ESLint + Prettier |
 
 **示例：**
 
@@ -181,7 +181,6 @@ my-cli create-react my-app
 # 使用预设
 my-cli create-react my-app --preset standard
 
-# 指定选项
 my-cli create-react my-app --js --css less --eslint --deps react-router zustand
 
 # 预设 + 覆盖
@@ -196,6 +195,10 @@ my-cli create-react my-app --preset minimal --deps gz-ui --prettier
 | Zustand | zustand | 5.0.3 |
 | Tailwind CSS | tailwindcss, @tailwindcss/vite | 4.1.3 |
 | GZ UI | gz-ui | 最新版 |
+| Axios | axios | 1.13.6 |
+| ECharts | echarts | 最新版 |
+| KLineChart | klinecharts | 最新版 |
+| AG Grid | ag-grid-community | 最新版 |
 
 ## 错误处理
 
