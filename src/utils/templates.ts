@@ -10,6 +10,9 @@ export const DEPENDENCIES: Record<string, DepConfig> = {
   'Tailwind CSS': { packages: ['tailwindcss', '@tailwindcss/vite'], version: '4.1.3' },
   'GZ UI': { packages: ['gz-ui'] },
   'Axios': { packages: ['axios'], version: '1.13.6' },
+  'ECharts': { packages: ['echarts'] },
+  'KLineChart': { packages: ['klinecharts'] },
+  'AG Grid': { packages: ['ag-grid-community'] },
 };
 
 export const VITE_TEMPLATE: Record<string, string> = {

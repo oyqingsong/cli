@@ -27,7 +27,7 @@ export default {
     { flags: '--css <css>', description: 'CSS preprocessor: css, less' },
     { flags: '--eslint', description: 'Include ESLint', default: 'false' },
     { flags: '--prettier', description: 'Include Prettier', default: 'false' },
-    { flags: '-d, --deps <deps...>', description: 'Extra dependencies: react-router, zustand, tailwind, gz-ui, axios' },
+    { flags: '-d, --deps <deps...>', description: 'Extra dependencies: react-router, zustand, tailwind, gz-ui, axios, echarts, klinechart, ag-grid' },
   ],
   action: async (args, opts) => {
     const positional = (args.positional ?? []) as string[];
@@ -57,6 +57,9 @@ export default {
       'tailwind': 'Tailwind CSS',
       'gz-ui': 'GZ UI',
       'axios': 'Axios',
+      'echarts': 'ECharts',
+      'klinechart': 'KLineChart',
+      'ag-grid': 'AG Grid',
     };
 
     const CSS_ALIAS: Record<string, CssOption> = {
