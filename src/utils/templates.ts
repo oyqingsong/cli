@@ -41,3 +41,21 @@ export const PRETTIER_CONFIG = {
 };
 
 export const PRETTIER_DEV_DEPS = ['prettier'];
+
+export const PRESETS: Record<string, { language: string; deps: string[]; tooling: string[] }> = {
+  minimal: {
+    language: 'TypeScript',
+    deps: [],
+    tooling: [],
+  },
+  standard: {
+    language: 'TypeScript',
+    deps: ['React Router'],
+    tooling: ['ESLint', 'Prettier'],
+  },
+  full: {
+    language: 'TypeScript',
+    deps: ['React Router', 'Zustand', 'Tailwind CSS', 'Ant Design'],
+    tooling: ['ESLint', 'Prettier'],
+  },
+};

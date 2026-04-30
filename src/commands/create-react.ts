@@ -10,14 +10,22 @@ import {
   getEslintConfig,
   PRETTIER_CONFIG,
   PRETTIER_DEV_DEPS,
+  PRESETS,
 } from '../utils/templates.js';
 
 export default {
   name: 'create-react',
   description: 'Create a new React project with Vite',
   arguments: '<project-name>',
-  options: [],
-  action: async (args) => {
+  options: [
+    { flags: '-p, --preset <preset>', description: 'Preset: minimal, standard, full' },
+    { flags: '--ts', description: 'Use TypeScript (default)', default: 'false' },
+    { flags: '--js', description: 'Use JavaScript', default: 'false' },
+    { flags: '--eslint', description: 'Include ESLint', default: 'false' },
+    { flags: '--prettier', description: 'Include Prettier', default: 'false' },
+    { flags: '-d, --deps <deps...>', description: 'Extra dependencies: react-router, zustand, tailwind, antd' },
+  ],
+  action: async (args, opts) => {
     const positional = (args.positional ?? []) as string[];
     const projectName = positional[0] ?? '';
     if (!projectName) {
@@ -31,17 +39,67 @@ export default {
       process.exit(1);
     }
 
-    // Step 1: Language selection
-    const language = await prompt.select('Select language:', ['TypeScript', 'JavaScript']);
+    // Resolve settings: CLI opts > preset > interactive
+    const presetName = opts.preset as string | undefined;
+    const preset = presetName ? PRESETS[presetName] : undefined;
+    if (presetName && !preset) {
+      logger.error(`Unknown preset "${presetName}". Available: ${Object.keys(PRESETS).join(', ')}`);
+      process.exit(1);
+    }
+
+    const DEP_ALIASES: Record<string, string> = {
+      'react-router': 'React Router',
+      'zustand': 'Zustand',
+      'tailwind': 'Tailwind CSS',
+      'antd': 'Ant Design',
+    };
+
+    const hasCliOpts = opts.ts === 'true' || opts.js === 'true' || opts.eslint === 'true' || opts.prettier === 'true' || (opts.deps as string[])?.length;
+
+    let language: string;
+    let selectedDeps: string[];
+    let selectedTooling: string[];
+
+    if (preset && !hasCliOpts) {
+      // Use preset values directly
+      language = preset.language;
+      selectedDeps = [...preset.deps];
+      selectedTooling = [...preset.tooling];
+    } else {
+      // Determine language
+      if (opts.js === 'true') {
+        language = 'JavaScript';
+      } else if (preset) {
+        language = preset.language;
+      } else {
+        language = await prompt.select('Select language:', ['TypeScript', 'JavaScript']);
+      }
+
+      // Determine dependencies
+      const cliDeps = ((opts.deps as string[]) ?? []).map((d: string) => DEP_ALIASES[d] ?? d);
+      if (cliDeps.length) {
+        selectedDeps = cliDeps;
+      } else if (preset) {
+        selectedDeps = [...preset.deps];
+      } else {
+        const depChoices = Object.keys(DEPENDENCIES);
+        selectedDeps = await prompt.multiselect('Select extra dependencies (space to toggle, enter to confirm):', depChoices);
+      }
+
+      // Determine tooling
+      const cliTooling: string[] = [];
+      if (opts.eslint === 'true') cliTooling.push('ESLint');
+      if (opts.prettier === 'true') cliTooling.push('Prettier');
+      if (cliTooling.length) {
+        selectedTooling = cliTooling;
+      } else if (preset) {
+        selectedTooling = [...preset.tooling];
+      } else {
+        selectedTooling = await prompt.multiselect('Select code tooling:', ['ESLint', 'Prettier']);
+      }
+    }
+
     const template = VITE_TEMPLATE[language];
-
-    // Step 2: Extra dependencies
-    const depChoices = Object.keys(DEPENDENCIES);
-    const selectedDeps = await prompt.multiselect('Select extra dependencies (space to toggle, enter to confirm):', depChoices);
-
-    // Step 3: Code tooling
-    const toolingChoices = ['ESLint', 'Prettier'];
-    const selectedTooling = await prompt.multiselect('Select code tooling:', toolingChoices);
 
     // Step 4: Confirm
     console.log('');
