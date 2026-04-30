@@ -34,11 +34,15 @@ export function getEslintConfig(isTypescript: boolean) {
     'plugin:react/recommended',
     'plugin:react-hooks/recommended',
   ];
-  const devDeps = ['eslint', 'eslint-plugin-react', 'eslint-plugin-react-hooks'];
+  const devDeps = [
+    'eslint@8.57.1',
+    'eslint-plugin-react@7.37.5',
+    'eslint-plugin-react-hooks@5.2.0',
+  ];
 
   if (isTypescript) {
     extendsArr.push('plugin:@typescript-eslint/recommended');
-    devDeps.push('@typescript-eslint/parser', '@typescript-eslint/eslint-plugin');
+    devDeps.push('@typescript-eslint/parser@8.30.0', '@typescript-eslint/eslint-plugin@8.30.0');
   }
 
   const config = {

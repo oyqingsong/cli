@@ -59,7 +59,7 @@ export const PRESETS = {
     },
     full: {
         language: 'TypeScript',
-        deps: ['React Router', 'Zustand', 'GZ UI', 'Axios'],
+        deps: ['React Router', 'Zustand', 'GZ UI', 'Axios', 'ECharts', 'KLineChart', 'AG Grid'],
         tooling: ['ESLint', 'Prettier'],
         css: 'Less',
     },
