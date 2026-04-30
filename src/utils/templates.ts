@@ -9,6 +9,7 @@ export const DEPENDENCIES: Record<string, DepConfig> = {
   'Zustand': { packages: ['zustand'], version: '5.0.3' },
   'Tailwind CSS': { packages: ['tailwindcss', '@tailwindcss/vite'], version: '4.1.3' },
   'GZ UI': { packages: ['gz-ui'] },
+  'Axios': { packages: ['axios'], version: '1.13.6' },
 };
 
 export const VITE_TEMPLATE: Record<string, string> = {
@@ -71,7 +72,7 @@ export const PRESETS: Record<string, { language: string; deps: string[]; tooling
   },
   full: {
     language: 'TypeScript',
-    deps: ['React Router', 'Zustand', 'GZ UI'],
+    deps: ['React Router', 'Zustand', 'GZ UI', 'Axios'],
     tooling: ['ESLint', 'Prettier'],
     css: 'Less',
   },
